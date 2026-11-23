@@ -272,7 +272,8 @@ export function JobsPage() {
               </h2>
               <span role="status">{jobs.length}</span>
             </div>
-            <div className="pp-results-controls">
+            {/* Links here carry the search text in their href when a query is active. */}
+            <div className="pp-results-controls" data-private={filters.query ? "" : undefined}>
               <span className="pp-sort-label">Najnowsze</span>
               <Link
                 className="pp-view-link"
@@ -291,7 +292,7 @@ export function JobsPage() {
             </div>
           </div>
           {Object.entries(filters).some(([k, v]) => k !== "page" && v) && (
-            <div className="pp-active-filters">
+            <div className="pp-active-filters" data-private>
               {Object.entries(filters)
                 .filter(([k, v]) => k !== "page" && v)
                 .map(([key, value]) => (

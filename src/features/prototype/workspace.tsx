@@ -50,7 +50,7 @@ export function PersonPicker() {
       <p className="mt-4 mb-8 text-muted-foreground">
         Wybierz profil, z którego chcesz korzystać w prototypie. Hasło nie jest potrzebne.
       </p>
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-5 sm:grid-cols-2" data-private>
         {people.map((person) => (
           <article key={person.id} className="prototype-panel">
             <h2 className="text-xl">{person.name}</h2>
@@ -111,7 +111,9 @@ export function WorkspaceHome() {
   );
   return (
     <>
-      <PageTitle>Witaj, {person.name.split(" ")[0]}</PageTitle>
+      <PageTitle>
+        Witaj, <span data-private>{person.name.split(" ")[0]}</span>
+      </PageTitle>
       <div className="grid gap-5 sm:grid-cols-3">
         {[
           ["Aplikacje", applications.length],
@@ -181,16 +183,16 @@ export function ProfilePage({ preview = false }: { preview?: boolean }) {
           </Link>
         }
       >
-        {preview ? person.name : "Twój profil"}
+        {preview ? <span data-private>{person.name}</span> : "Twój profil"}
       </PageTitle>
       {preview ? (
-        <div className="prototype-panel space-y-4">
+        <div className="prototype-panel space-y-4" data-private>
           <h2>{person.headline}</h2>
           <p>{person.location}</p>
           <p>{person.bio}</p>
         </div>
       ) : (
-        <form onSubmit={save} className="prototype-panel prototype-form">
+        <form onSubmit={save} className="prototype-panel prototype-form" data-private>
           <Field label="Imię i nazwisko">
             <Input name="name" required maxLength={200} defaultValue={person.name} />
           </Field>
@@ -341,6 +343,7 @@ export function ApplyPage() {
           onSubmit={submit}
           className="record-sheet application-form"
           aria-labelledby="application-form-title"
+          data-private
         >
           <header className="application-form-intro">
             <h2 id="application-form-title">Twoja aplikacja</h2>
@@ -507,7 +510,7 @@ export function ApplicationsPage({ employer = false }: { employer?: boolean }) {
       <Field label={employer ? "Szukaj kandydata lub oferty" : "Szukaj oferty"}>
         <Input value={query} onChange={(e) => setQuery(e.target.value)} />
       </Field>
-      <div className="mt-6 space-y-4">
+      <div className="mt-6 space-y-4" data-private>
         {applications.length ? (
           applications.map((a) => (
             <article className="prototype-panel" key={a.id}>
