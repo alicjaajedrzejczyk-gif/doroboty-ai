@@ -1,20 +1,31 @@
 import { describe, expect, it } from "vitest";
 import { pageviewProperties } from "./posthog-pageviews";
-import { posthogOptions } from "./posthog";
+import { PRIVATE_SELECTOR, posthogOptions } from "./posthog";
 
 describe("posthogOptions", () => {
   const options = posthogOptions("https://eu.i.posthog.com", "production");
 
-  it("turns off recording, autocapture and person profiles regardless of project settings", () => {
+  it("keeps session replay, heatmaps, rage/dead clicks, surveys and person profiles off", () => {
     expect(options).toMatchObject({
-      autocapture: false,
+      disable_session_recording: true,
       rageclick: false,
       capture_dead_clicks: false,
       capture_heatmaps: false,
-      disable_session_recording: true,
       disable_surveys: true,
       person_profiles: "never",
     });
+  });
+
+  it("autocaptures only clicks on buttons and links outside private areas, without hrefs", () => {
+    expect(options.autocapture).toMatchObject({
+      dom_event_allowlist: ["click"],
+      element_allowlist: ["a", "button"],
+      element_attribute_ignorelist: ["href"],
+      capture_copied_text: false,
+    });
+    const autocapture = options.autocapture as { css_selector_ignorelist: string[] };
+    expect(autocapture.css_selector_ignorelist).toContain(PRIVATE_SELECTOR);
+    expect(autocapture.css_selector_ignorelist).toContain(".ph-no-autocapture");
   });
 
   it("leaves pageviews to the router so search text in the hash is never sent", () => {

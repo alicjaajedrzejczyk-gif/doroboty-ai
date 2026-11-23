@@ -291,7 +291,7 @@ export function JobsPage() {
             </div>
           </div>
           {Object.entries(filters).some(([k, v]) => k !== "page" && v) && (
-            <div className="pp-active-filters">
+            <div className="pp-active-filters" data-private>
               {Object.entries(filters)
                 .filter(([k, v]) => k !== "page" && v)
                 .map(([key, value]) => (

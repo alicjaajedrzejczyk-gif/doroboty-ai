@@ -41,7 +41,7 @@ export function CvAttachment({
     );
   const href = `${import.meta.env.BASE_URL}cv/${filename}`;
   return (
-    <div className="cv-attachment">
+    <div className="cv-attachment" data-private>
       <div className={layout === "row" ? "cv-file-row" : "space-y-4"}>
         {layout === "row" ? (
           <>
@@ -73,7 +73,11 @@ export function CvAttachment({
         </div>
       </div>
       {preview && (
-        <iframe className="cv-preview" title="Podgląd CV (PDF)" src={`${href}#view=FitH`} />
+        <iframe
+          className="cv-preview ph-no-capture"
+          title="Podgląd CV (PDF)"
+          src={`${href}#view=FitH`}
+        />
       )}
     </div>
   );
