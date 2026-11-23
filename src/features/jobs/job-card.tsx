@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import posthog from "posthog-js";
+import { posthogConfigured } from "@/lib/posthog";
 import { ArrowUpRight, Bookmark, MapPin, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePrototype } from "@/features/prototype/store";
@@ -7,10 +8,6 @@ import type { JobWithCompany } from "./types";
 import { categoryLabels, functionLabels, remoteLabels, seniorityLabels } from "./presentation";
 import { CompanyLogo } from "./company-logo";
 import { SalaryFact } from "./salary-fact";
-
-const posthogConfigured = Boolean(
-  import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN && import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
-);
 
 export function JobCard({ job, saved }: { job: JobWithCompany; saved?: boolean }) {
   const { run } = usePrototype();

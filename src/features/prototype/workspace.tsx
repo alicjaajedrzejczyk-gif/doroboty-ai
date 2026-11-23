@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router";
 import posthog from "posthog-js";
+import { posthogConfigured } from "@/lib/posthog";
 import { CheckCircle2, FileText } from "lucide-react";
 import { ConfettiBurst, type ConfettiOrigin } from "@/components/confetti-burst";
 import { BackLink } from "@/components/back-link";
@@ -23,10 +24,6 @@ import { CvAttachment } from "./cv-attachment";
 import { MatchScore } from "./match-score";
 import { RecruitingApplication } from "./recruiting-application";
 import { CandidateApplication } from "./candidate-application";
-
-const posthogConfigured = Boolean(
-  import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN && import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
-);
 
 export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (

@@ -1,13 +1,10 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import posthog from "posthog-js";
+import { posthogConfigured } from "@/lib/posthog";
 import { Button } from "@/components/ui/button";
 import { ApplicationRecord } from "./application-record";
 import type { Application } from "./model";
 import { usePrototype } from "./store";
-
-const posthogConfigured = Boolean(
-  import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN && import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
-);
 
 export function CandidateApplication({ application }: { application: Application }) {
   const { state, run } = usePrototype();

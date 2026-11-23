@@ -1,4 +1,5 @@
 import { HashRouter, Routes, Route, Navigate } from "react-router";
+import { PosthogPageviews } from "@/lib/posthog-pageviews";
 import { PrototypeProvider } from "./store";
 import { Shell, NotFound } from "./shell";
 import HomePage from "./home";
@@ -151,6 +152,7 @@ export function App() {
   return (
     <PrototypeProvider>
       <HashRouter>
+        <PosthogPageviews />
         <AppRoutes />
       </HashRouter>
     </PrototypeProvider>

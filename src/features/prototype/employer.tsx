@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import posthog from "posthog-js";
+import { posthogConfigured } from "@/lib/posthog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,10 +19,6 @@ import { usePrototype } from "./store";
 import { Field } from "./workspace";
 import { Empty, NotFound, PageTitle } from "./shell";
 import { appLog } from "@/lib/posthog-log";
-
-const posthogConfigured = Boolean(
-  import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN && import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
-);
 
 export function EmployerJobs() {
   const { state } = usePrototype();

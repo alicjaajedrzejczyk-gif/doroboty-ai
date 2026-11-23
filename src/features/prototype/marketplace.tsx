@@ -1,6 +1,7 @@
 import { Link, useLocation, useParams, useSearchParams } from "react-router";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import posthog from "posthog-js";
+import { posthogConfigured } from "@/lib/posthog";
 import { ArrowUpRight, Users, MapPin, BriefcaseBusiness, Bookmark } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Search, ArrowRight, Monitor, X } from "lucide-react";
@@ -28,10 +29,6 @@ import { currentPerson, publishedJobs } from "./model";
 import { NotFound } from "./shell";
 import { appLog } from "@/lib/posthog-log";
 import { cn } from "@/lib/utils";
-
-const posthogConfigured = Boolean(
-  import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN && import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
-);
 
 function LocalMap({ jobs }: { jobs: JobWithCompany[] }) {
   const [selected, setSelected] = useState<string | null>(null);
