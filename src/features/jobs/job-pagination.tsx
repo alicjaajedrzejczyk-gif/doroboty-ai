@@ -19,12 +19,7 @@ export function JobPagination({
         Oferty {start}–{end} z {total}
       </p>
       {totalPages > 1 && (
-        <nav
-          aria-label="Strony ofert"
-          className="flex items-center gap-[var(--gui-space-xs)]"
-          // Page links carry the search text in their href when a query is active.
-          data-private={filters.query ? "" : undefined}
-        >
+        <nav aria-label="Strony ofert" className="flex items-center gap-[var(--gui-space-xs)]">
           {page > 1 ? (
             <Link
               rel="prev"

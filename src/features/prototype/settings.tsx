@@ -129,9 +129,9 @@ export function PrivacyPage() {
         </p>
         <p>
           Opublikowana wersja korzysta z PostHog (serwery w UE), żeby poprawiać interfejs: zlicza
-          odwiedzone strony i kliknięcia w przyciski oraz nagrywa przebieg wizyty. Pola formularzy,
-          imiona, profile, aplikacje, CV, notatki i wyszukiwane frazy są w nagraniach zakryte i nie
-          trafiają do statystyk.
+          odwiedzone strony i kliknięcia w przyciski. Nie nagrywa przebiegu wizyty. Treść pól
+          formularzy, imiona, profile, aplikacje, CV, notatki i wyszukiwane frazy nie trafiają do
+          statystyk.
         </p>
         <p>
           Możesz usunąć zmiany przyciskiem „Resetuj scenariusz” w ustawieniach lub wyczyścić dane

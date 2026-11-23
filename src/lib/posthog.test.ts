@@ -5,13 +5,13 @@ import { PRIVATE_SELECTOR, posthogOptions } from "./posthog";
 describe("posthogOptions", () => {
   const options = posthogOptions("https://eu.i.posthog.com", "production");
 
-  it("keeps heatmaps, rage/dead clicks, surveys and person profiles off", () => {
+  it("keeps session replay, heatmaps, rage/dead clicks, surveys and person profiles off", () => {
     expect(options).toMatchObject({
+      disable_session_recording: true,
       rageclick: false,
       capture_dead_clicks: false,
       capture_heatmaps: false,
       disable_surveys: true,
-      enable_recording_console_log: false,
       person_profiles: "never",
     });
   });
@@ -26,14 +26,6 @@ describe("posthogOptions", () => {
     const autocapture = options.autocapture as { css_selector_ignorelist: string[] };
     expect(autocapture.css_selector_ignorelist).toContain(PRIVATE_SELECTOR);
     expect(autocapture.css_selector_ignorelist).toContain(".ph-no-autocapture");
-  });
-
-  it("records sessions with all inputs masked and private areas blocked", () => {
-    expect(options.disable_session_recording).toBe(false);
-    expect(options.session_recording).toEqual({
-      maskAllInputs: true,
-      blockSelector: PRIVATE_SELECTOR,
-    });
   });
 
   it("leaves pageviews to the router so search text in the hash is never sent", () => {

@@ -272,8 +272,7 @@ export function JobsPage() {
               </h2>
               <span role="status">{jobs.length}</span>
             </div>
-            {/* Links here carry the search text in their href when a query is active. */}
-            <div className="pp-results-controls" data-private={filters.query ? "" : undefined}>
+            <div className="pp-results-controls">
               <span className="pp-sort-label">Najnowsze</span>
               <Link
                 className="pp-view-link"

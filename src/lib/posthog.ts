@@ -8,16 +8,15 @@ export const posthogConfigured = Boolean(token && host);
 
 /**
  * Marks UI that shows or collects private free text (names, profile, application, CV,
- * notes, search filters). Autocapture ignores clicks inside it and replays show it as a blank box.
+ * notes, search filters). Autocapture ignores clicks inside it.
  */
 export const PRIVATE_SELECTOR = "[data-private]";
 
 /**
  * Privacy-first PostHog options: route-only pageviews, the explicit free-text-free events,
- * click autocapture on buttons and links, and session replay with inputs masked and private
- * areas blocked. Heatmaps, rage/dead
- * clicks, surveys, console logs in replays and person profiles stay off in code, whatever
- * the PostHog project settings say.
+ * and click autocapture on buttons and links outside private areas. Session replay, heatmaps,
+ * rage/dead clicks, surveys and person profiles stay off in code, whatever the PostHog
+ * project settings say.
  */
 export function posthogOptions(apiHost: string, mode: string): Partial<PostHogConfig> {
   return {
@@ -39,14 +38,7 @@ export function posthogOptions(apiHost: string, mode: string): Partial<PostHogCo
     rageclick: false,
     capture_dead_clicks: false,
     capture_heatmaps: false,
-    disable_session_recording: false,
-    session_recording: {
-      maskAllInputs: true,
-      // Blocked, not just masked: masking hides text but keeps attributes such as
-      // aria-label="Usuń filtr: <search>" or the CV file name in href.
-      blockSelector: PRIVATE_SELECTOR,
-    },
-    enable_recording_console_log: false,
+    disable_session_recording: true,
     disable_surveys: true,
     // Personas are a role simulation, not users: events stay anonymous, no person profiles.
     person_profiles: "never",
