@@ -299,3 +299,33 @@
   background: var(--gui-color-1);
   color: var(--gui-text);
 }
+.application-self-work {
+  border-inline: 0;
+  border-bottom: 0;
+  margin: 0;
+  min-width: 0;
+}
+.application-self-work legend {
+  padding: 0;
+  float: left;
+  width: 100%;
+}
+.application-self-work > .application-help {
+  clear: both;
+}
+.application-self-work-field {
+  margin-top: 18px;
+  clear: both;
+}
+.application-self-work-field .field > span {
+  font-size: 15px;
+}
+.application-self-work-field textarea {
+  margin-top: 6px;
+  font-size: 15px;
+  line-height: 1.7;
+}
+.application-self-work-field .application-help {
+  margin-top: 6px;
+  font-size: 12px;
+}

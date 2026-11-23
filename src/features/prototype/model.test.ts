@@ -21,6 +21,42 @@ function submitted() {
   );
 }
 describe("coherent browser scenario", () => {
+  it("stores the optional self-work card and defaults legacy records", () => {
+    const s = as(initialState(), "candidate-anna");
+    const next = transition(
+      s,
+      {
+        type: "submit",
+        jobId: s.jobs[0].id,
+        notes: "",
+        generated: "",
+        answer: "Approved application with sufficient context.",
+        project: "Bot do zgłoszeń",
+        ownPart: "Prompty i testy",
+        result: "Skrócony czas odpowiedzi o 25%.",
+        usage: "Tak, przez zespół wsparcia",
+        consent: true,
+      },
+      time,
+      "application-result",
+    );
+    expect(next.applications.at(-1)!).toMatchObject({
+      project: "Bot do zgłoszeń",
+      ownPart: "Prompty i testy",
+      result: "Skrócony czas odpowiedzi o 25%.",
+      usage: "Tak, przez zespół wsparcia",
+    });
+    expect(submitted().applications.at(-1)!.result).toBe("");
+    const legacy = JSON.parse(JSON.stringify(next));
+    for (const key of ["project", "ownPart", "result", "usage"])
+      delete legacy.applications.at(-1)[key];
+    expect(stateSchema.parse(legacy).applications.at(-1)!).toMatchObject({
+      project: "",
+      ownPart: "",
+      result: "",
+      usage: "",
+    });
+  });
   it("requires approval and prevents duplicate applications", () => {
     const s = as(initialState(), "candidate-anna");
     const input = {

@@ -6,6 +6,12 @@ import { CvAttachment } from "./cv-attachment";
 import { MatchScore } from "./match-score";
 import { stageLabels, type Application, type Stage } from "./model";
 
+const selfWorkLabels = [
+  ["project", "Projekt"],
+  ["ownPart", "Moja część"],
+  ["result", "Rezultat"],
+  ["usage", "Czy rozwiązanie było używane?"],
+] as const;
 type RecordEvent = { stage: Stage; at: string; note?: string };
 const dateFormat = new Intl.DateTimeFormat("pl-PL", {
   dateStyle: "medium",
@@ -24,7 +30,18 @@ export function ApplicationRecord({
 }: {
   application: Pick<
     Application,
-    "candidateId" | "candidateName" | "jobTitle" | "stage" | "answer" | "cv" | "score" | "summary"
+    | "candidateId"
+    | "candidateName"
+    | "jobTitle"
+    | "stage"
+    | "answer"
+    | "project"
+    | "ownPart"
+    | "result"
+    | "usage"
+    | "cv"
+    | "score"
+    | "summary"
   >;
   companyName: string;
   audience: "candidate" | "employer";
@@ -90,6 +107,25 @@ export function ApplicationRecord({
                     layout="row"
                     preview
                   />
+                </>
+              ),
+            },
+            {
+              value: "self-work",
+              label: "Co zrobiłem sam",
+              content: (
+                <>
+                  <h3>Co zrobiłem sam</h3>
+                  <dl className="record-self-work">
+                    {selfWorkLabels.map(([key, label]) => (
+                      <div key={key}>
+                        <dt>{label}</dt>
+                        <dd className={application[key] ? undefined : "record-caption"}>
+                          {application[key] || "brak informacji"}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
                 </>
               ),
             },

@@ -10,6 +10,14 @@ const id = z
   .regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/);
 const shortText = z.string().trim().min(1).max(200);
 const text = z.string().trim().max(12000);
+/** Optional "Co zrobiłem sam" card; legacy records without it parse as empty. */
+const selfWorkFields = {
+  project: text.default(""),
+  ownPart: text.default(""),
+  result: text.default(""),
+  usage: text.default(""),
+};
+export type SelfWork = { project?: string; ownPart?: string; result?: string; usage?: string };
 export const MIN_APPLICATION_ANSWER_LENGTH = 20;
 const companySchema = z.object({
   id,
@@ -113,6 +121,7 @@ const applicationSchema = z.object({
   candidateName: shortText,
   cv: text.min(20),
   answer: text.min(MIN_APPLICATION_ANSWER_LENGTH),
+  ...selfWorkFields,
   sourceNotes: text,
   generatedAnswer: text,
   score: z.number().int().min(0).max(100),
@@ -129,6 +138,7 @@ const draftSchema = z.object({
   notes: text,
   generated: text,
   answer: text,
+  ...selfWorkFields,
 });
 export const stateSchema = z
   .object({
@@ -201,15 +211,21 @@ export type Action =
   | { type: "select_person"; id: string | null }
   | { type: "profile"; value: z.infer<typeof profileSchema> }
   | { type: "toggle_saved"; jobId: string }
-  | { type: "draft"; jobId: string; notes: string; generated: string; answer: string }
-  | {
+  | ({
+      type: "draft";
+      jobId: string;
+      notes: string;
+      generated: string;
+      answer: string;
+    } & SelfWork)
+  | ({
       type: "submit";
       jobId: string;
       notes: string;
       generated: string;
       answer: string;
       consent: boolean;
-    }
+    } & SelfWork)
   | { type: "stage"; applicationId: string; stage: Stage; note: string }
   | { type: "withdraw"; applicationId: string }
   | { type: "publish"; job: z.infer<typeof jobSchema> }
@@ -237,6 +253,10 @@ export function initialState(): State {
     cv: bob.cv,
     answer:
       "Pracowałem nad automatyzacją obsługi zgłoszeń. Poprowadziłem badania z użytkownikami i wdrożenie, które skróciło czas odpowiedzi o 25%. Chętnie opowiem o decyzjach i ograniczeniach tego projektu.",
+    project: "Automatyzacja obsługi zgłoszeń klientów z pomocą AI.",
+    ownPart: "Badania z użytkownikami, wybór przypadków do automatyzacji i prowadzenie wdrożenia.",
+    result: "Czas pierwszej odpowiedzi spadł o 25%.",
+    usage: "Tak, codziennie używa go zespół obsługi klienta.",
     sourceNotes: "",
     generatedAnswer: "",
     score: bob.exampleScore,
@@ -308,6 +328,10 @@ export function transition(
         candidateName: p.name,
         cv: p.cv,
         answer: action.answer,
+        project: action.project ?? "",
+        ownPart: action.ownPart ?? "",
+        result: action.result ?? "",
+        usage: action.usage ?? "",
         sourceNotes: action.notes,
         generatedAnswer: action.generated,
         score: p.exampleScore,

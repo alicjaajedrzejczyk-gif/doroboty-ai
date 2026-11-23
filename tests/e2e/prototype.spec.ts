@@ -356,7 +356,7 @@ for (const width of [1440, 375]) {
       generated: "Dawna propozycja AI, która nie jest zatwierdzoną odpowiedzią",
       answer: "Zapisana wcześniej odpowiedź kandydata do dalszej edycji.",
     };
-    legacy.drafts.push(draft);
+    legacy.drafts.push(draft as (typeof legacy.drafts)[number]);
     await choose(page, "Anna Kowalska");
     await page.goto("/#/app/settings");
     await page.getByLabel("Importuj plik scenariusza").setInputFiles({
@@ -370,7 +370,11 @@ for (const width of [1440, 375]) {
     const form = page.locator("main form");
     const answer = page.getByLabel("Dlaczego pasujesz do tej roli?");
     await expect(answer).toHaveValue(draft.answer);
-    await expect(form.getByRole("textbox")).toHaveCount(1);
+    // The answer plus the four optional "Co zrobiłem sam" fields, which start empty for legacy drafts.
+    await expect(form.getByRole("textbox")).toHaveCount(5);
+    for (const textbox of await form.getByRole("textbox").all())
+      if ((await textbox.getAttribute("id")) !== (await answer.getAttribute("id")))
+        await expect(textbox).toHaveValue("");
     await expect(page.getByLabel("Twoje notatki do aplikacji (opcjonalnie)")).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Przygotuj propozycję z AI" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Użyj propozycji" })).toHaveCount(0);
@@ -389,6 +393,10 @@ for (const width of [1440, 375]) {
       ),
     ).toBe(true);
     await answer.focus();
+    for (const label of ["Projekt", "Moja część", "Rezultat", "Czy rozwiązanie było używane?"]) {
+      await page.keyboard.press("Tab");
+      await expect(form.getByLabel(label, { exact: true })).toBeFocused();
+    }
     await page.keyboard.press("Tab");
     await expect(page.getByRole("checkbox")).toBeFocused();
     await page.keyboard.press("Tab");
@@ -397,9 +405,9 @@ for (const width of [1440, 375]) {
     await expect(page.getByRole("button", { name: "Zapisz szkic", exact: true })).toBeFocused();
     const editedAnswer = "Moja poprawiona odpowiedź opisuje doświadczenie potrzebne w tej roli.";
     await answer.fill(editedAnswer);
-    await page.keyboard.press("Tab");
-    await page.keyboard.press("Tab");
-    await page.keyboard.press("Tab");
+    // Four self-work fields, consent and submit precede "Zapisz szkic".
+    for (let step = 0; step < 7; step++) await page.keyboard.press("Tab");
+    await expect(page.getByRole("button", { name: "Zapisz szkic", exact: true })).toBeFocused();
     await page.keyboard.press("Enter");
     await expect(page.getByRole("status")).toHaveText("Szkic został zapisany.");
     expect(
@@ -407,7 +415,14 @@ for (const width of [1440, 375]) {
         (key) => JSON.parse(localStorage.getItem(key)!).drafts.at(-1),
         STORAGE_KEY,
       ),
-    ).toEqual({ ...draft, answer: editedAnswer });
+    ).toEqual({
+      ...draft,
+      answer: editedAnswer,
+      project: "",
+      ownPart: "",
+      result: "",
+      usage: "",
+    });
     await page.reload();
     await expect(answer).toHaveValue(editedAnswer);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
@@ -417,7 +432,7 @@ for (const width of [1440, 375]) {
       path: `artifacts/application-simplified-${width}.png`,
       fullPage: true,
     });
-    await answer.focus();
+    await page.getByLabel("Czy rozwiązanie było używane?", { exact: true }).focus();
     await page.keyboard.press("Tab");
     await page.keyboard.press("Space");
     await page.keyboard.press("Tab");
@@ -994,4 +1009,28 @@ test("candidate snapshot supports custom CV and long content at desktop and mobi
   await expect(page.getByRole("tabpanel", { name: "Odpowiedź", exact: true })).toContainText(
     record.answer,
   );
+});
+
+test("a second open tab adopts saved changes instead of overwriting them", async ({ context }) => {
+  const first = await context.newPage();
+  await choose(first, "Anna Kowalska");
+  await first.goto("/#/oferty/ai-product-manager");
+  await expect(first.getByRole("link", { name: "Aplikuj", exact: true })).toBeVisible();
+  const second = await context.newPage();
+  await application(second);
+  await expect(second).toHaveURL(/wyslano/);
+  // The first tab learns about the submission without a reload…
+  await expect(
+    first.getByRole("link", { name: "Zobacz swoją aplikację", exact: true }),
+  ).toBeVisible();
+  // …so its own later change keeps the application instead of erasing it.
+  await first.getByRole("button", { name: "Zapisz ofertę", exact: true }).click();
+  await expect(first.getByRole("button", { name: "Zapisz ofertę", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  const stored = await first.evaluate((key) => JSON.parse(localStorage.getItem(key)!), STORAGE_KEY);
+  const initial = initialState();
+  expect(stored.applications).toHaveLength(initial.applications.length + 1);
+  expect(stored.saved).toHaveLength(initial.saved.length + 1);
 });

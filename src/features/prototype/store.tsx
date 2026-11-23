@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import { initialState, transition, type Action, type State } from "./model";
-import { parseState, readState, saveState, type StoragePort } from "./storage";
+import { parseState, readState, saveState, STORAGE_KEY, type StoragePort } from "./storage";
 function browserStorage(): StoragePort | null {
   try {
     return window.localStorage;
@@ -53,6 +53,31 @@ function useStore() {
   }
   useEffect(() => {
     document.documentElement.classList.remove("dark");
+  }, []);
+  // Another open tab saved the scenario: adopt its data so this tab's next save cannot
+  // overwrite it. Each tab keeps its own selected person, so candidate and employer views
+  // can stay open side by side. Unreadable values are ignored and never written back.
+  useEffect(() => {
+    function onStorage(event: StorageEvent) {
+      if (event.key !== STORAGE_KEY || !event.newValue) return;
+      let incoming: State;
+      try {
+        incoming = parseState(event.newValue);
+      } catch {
+        return;
+      }
+      const ownPerson = latest.current.activePersonId;
+      const next =
+        ownPerson === null || incoming.people.some((person) => person.id === ownPerson)
+          ? { ...incoming, activePersonId: ownPerson }
+          : incoming;
+      latest.current = next;
+      setState(next);
+      setBlocked(false);
+      setIssue("");
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
   }, []);
   return {
     state,

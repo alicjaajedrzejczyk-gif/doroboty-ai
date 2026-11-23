@@ -337,3 +337,27 @@
   border-radius: 10px;
   background: var(--gui-canvas);
 }
+.record-self-work {
+  display: grid;
+  gap: 18px;
+}
+.record-self-work dt {
+  font-weight: 600;
+}
+.record-self-work dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+}
+/* Three record tabs ("Co zrobiłem sam" is long) must fit the narrowest phones without clipping. */
+@media (max-width: 420px) {
+  .record-tabs {
+    gap: 4px;
+  }
+  .record-tabs .record-tab {
+    flex: 0 1 auto;
+    min-width: 0;
+    padding-inline: 8px;
+    white-space: normal;
+    text-align: center;
+  }
+}

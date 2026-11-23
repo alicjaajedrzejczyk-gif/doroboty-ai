@@ -10,7 +10,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { JobCard } from "@/features/jobs/job-card";
 import { ApplicationOfferPreview } from "@/features/jobs/application-offer-preview";
 import { usePrototype } from "./store";
-import { currentPerson, publishedJobs, stageLabels, MIN_APPLICATION_ANSWER_LENGTH } from "./model";
+import {
+  currentPerson,
+  publishedJobs,
+  stageLabels,
+  MIN_APPLICATION_ANSWER_LENGTH,
+  type SelfWork,
+} from "./model";
 import { PageTitle, Empty, NotFound, Notice } from "./shell";
 import { CvAttachment } from "./cv-attachment";
 import { MatchScore } from "./match-score";
@@ -229,6 +235,20 @@ export function SavedPage() {
     </>
   );
 }
+const selfWorkQuestions: { key: keyof SelfWork; label: string; hint: string }[] = [
+  { key: "project", label: "Projekt", hint: "Czego dotyczył projekt?" },
+  { key: "ownPart", label: "Moja część", hint: "Co zrobiłeś sam, a co zespół?" },
+  {
+    key: "result",
+    label: "Rezultat",
+    hint: "Co zmieniło się dzięki Twojej pracy? Najlepiej podaj mierzalny efekt.",
+  },
+  {
+    key: "usage",
+    label: "Czy rozwiązanie było używane?",
+    hint: "Tak lub nie. Jeśli tak, to przez kogo i jak długo.",
+  },
+];
 export function ApplyPage() {
   const { slug } = useParams();
   const { state, run } = usePrototype();
@@ -239,6 +259,12 @@ export function ApplyPage() {
   const notes = draft?.notes ?? "";
   const generated = draft?.generated ?? "";
   const [answer, setAnswer] = useState(draft?.answer ?? "");
+  const [work, setWork] = useState<Required<SelfWork>>({
+    project: draft?.project ?? "",
+    ownPart: draft?.ownPart ?? "",
+    result: draft?.result ?? "",
+    usage: draft?.usage ?? "",
+  });
   const [consent, setConsent] = useState(false);
   const [message, setMessage] = useState("");
   const [attempted, setAttempted] = useState(false);
@@ -281,7 +307,7 @@ export function ApplyPage() {
       document.getElementById("application-consent")?.focus();
       return;
     }
-    if (run({ type: "submit", jobId: job!.id, notes, generated, answer, consent })) {
+    if (run({ type: "submit", jobId: job!.id, notes, generated, answer, ...work, consent })) {
       submittedOnce.current = true;
       setSubmitted(true);
       if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -352,6 +378,38 @@ export function ApplyPage() {
                 : `Minimum ${MIN_APPLICATION_ANSWER_LENGTH} znaków. Obecnie: ${answerLength}.`}
             </p>
           </section>
+          <fieldset
+            className="application-form-section application-self-work"
+            aria-describedby="application-self-work-help"
+          >
+            <legend>
+              <h3>Co zrobiłem sam</h3>
+            </legend>
+            <p id="application-self-work-help" className="application-help">
+              Opcjonalnie. Opisz jeden projekt i swoją własną część pracy. Pracodawca zobaczy te
+              odpowiedzi jako osobną kartę.
+            </p>
+            {selfWorkQuestions.map(({ key, label, hint }) => (
+              <div key={key} className="application-self-work-field">
+                <Field label={label}>
+                  <Textarea
+                    disabled={submitted}
+                    maxLength={12000}
+                    rows={2}
+                    aria-describedby={`application--hint`}
+                    value={work[key]}
+                    onChange={(e) => {
+                      setWork({ ...work, [key]: e.target.value });
+                      setConsent(false);
+                    }}
+                  />
+                </Field>
+                <p id={`application--hint`} className="application-help">
+                  {hint}
+                </p>
+              </div>
+            ))}
+          </fieldset>
           <div className="application-form-section application-submit">
             <label className="application-consent">
               <Checkbox
@@ -387,7 +445,7 @@ export function ApplyPage() {
                 disabled={submitted}
                 variant="outline"
                 onClick={() => {
-                  if (run({ type: "draft", jobId: job.id, notes, generated, answer }))
+                  if (run({ type: "draft", jobId: job.id, notes, generated, answer, ...work }))
                     setMessage("Szkic został zapisany.");
                 }}
               >
