@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import posthog from "posthog-js";
 import { initialState, transition, type Action, type State } from "./model";
 import { parseState, readState, saveState, STORAGE_KEY, type StoragePort } from "./storage";
 function browserStorage(): StoragePort | null {
@@ -15,6 +16,10 @@ function useStore() {
   const [error, setError] = useState("");
   const [blocked, setBlocked] = useState(loaded.blocked);
   const latest = useRef(state);
+  const identifiedPersonId = useRef<string | null | undefined>(undefined);
+  const posthogConfigured = Boolean(
+    import.meta.env.VITE_PUBLIC_POSTHOG_PROJECT_TOKEN && import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+  );
   function commit(next: State, replace = false) {
     latest.current = next;
     setState(next);
@@ -54,6 +59,17 @@ function useStore() {
   useEffect(() => {
     document.documentElement.classList.remove("dark");
   }, []);
+  useEffect(() => {
+    if (!posthogConfigured || identifiedPersonId.current === state.activePersonId) return;
+
+    if (identifiedPersonId.current !== undefined && identifiedPersonId.current !== null)
+      posthog.reset();
+
+    const person = state.people.find((item) => item.id === state.activePersonId);
+    if (person) posthog.identify(person.id, { name: person.name, role: person.role });
+
+    identifiedPersonId.current = state.activePersonId;
+  }, [posthogConfigured, state.activePersonId, state.people]);
   // Another open tab saved the scenario: adopt its data so this tab's next save cannot
   // overwrite it. Each tab keeps its own selected person, so candidate and employer views
   // can stay open side by side. Unreadable values are ignored and never written back.
