@@ -28,9 +28,10 @@ function useStore() {
       setIssue((e as Error).message);
     }
   }
-  function run(action: Action) {
+  /** `newId` lets a caller know the id of a record the action creates (e.g. for analytics). */
+  function run(action: Action, newId?: string) {
     try {
-      commit(transition(latest.current, action));
+      commit(transition(latest.current, action, undefined, newId));
       return true;
     } catch (e) {
       setError(

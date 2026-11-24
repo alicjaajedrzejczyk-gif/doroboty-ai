@@ -14,6 +14,7 @@ export function RecruitingApplication({ application }: { application: Applicatio
   const statusRef = useRef<HTMLSpanElement>(null);
   const pendingFocus = useRef(false);
   const company = state.companies.find((item) => item.id === application.companyId);
+  const job = state.jobs.find((item) => item.id === application.jobId);
   const availableStages = nextStages[application.stage];
 
   useLayoutEffect(() => {
@@ -44,6 +45,12 @@ export function RecruitingApplication({ application }: { application: Applicatio
                       if (run({ type: "stage", applicationId: application.id, stage, note })) {
                         if (posthogConfigured)
                           posthog.capture("application_stage_updated", {
+                            application_id: application.id,
+                            job_id: application.jobId,
+                            job_published_at: job?.publishedAt,
+                            days_since_job_published: job
+                              ? Math.floor((Date.now() - Date.parse(job.publishedAt)) / 86_400_000)
+                              : undefined,
                             previous_stage: application.stage,
                             new_stage: stage,
                             has_note: Boolean(note.trim()),

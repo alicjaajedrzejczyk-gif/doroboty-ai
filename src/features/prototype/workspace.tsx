@@ -313,9 +313,18 @@ export function ApplyPage() {
       document.getElementById("application-consent")?.focus();
       return;
     }
-    if (run({ type: "submit", jobId: job!.id, notes, generated, answer, ...work, consent })) {
+    const applicationId = crypto.randomUUID();
+    if (
+      run(
+        { type: "submit", jobId: job!.id, notes, generated, answer, ...work, consent },
+        applicationId,
+      )
+    ) {
       if (posthogConfigured)
         posthog.capture("application_submitted", {
+          // Synthetic prototype ids (not personal data): one application per candidate–job pair.
+          application_id: applicationId,
+          job_id: job!.id,
           job_category: job!.category,
           job_function: job!.function,
           has_self_work: Object.values(work).some(Boolean),

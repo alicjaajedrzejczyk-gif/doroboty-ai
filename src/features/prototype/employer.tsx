@@ -139,6 +139,8 @@ export function EmployerJobEditor() {
     if (run({ type: "publish", job: parsed.data })) {
       if (posthogConfigured)
         posthog.capture("job_published", {
+          job_id: parsed.data.id,
+          job_published_at: parsed.data.publishedAt,
           is_update: Boolean(existing),
           job_category: parsed.data.category,
           job_function: parsed.data.function,
